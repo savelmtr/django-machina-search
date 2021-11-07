@@ -14,11 +14,11 @@ from machina.core.urls import URLPatternsFactory
 
 
 class ForumSearchURLPatternsFactory(URLPatternsFactory):
-    """ Allows to generate the URL patterns of the ``forum_search`` application. """
+    """ Allows to generate the URL patterns of the ``machina_search`` application. """
 
-    app_namespace = 'forum_search'
+    app_namespace = 'machina_search'
 
-    search_view = get_class('forum_search.views', 'PostgresSearchView')
+    search_view = get_class('machina_search.views', 'PostgresSearchView')
     search_path = path('', search_view.as_view(), name='search')
 
     def get_urlpatterns(self):

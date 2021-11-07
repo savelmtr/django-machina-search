@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.views import View
 
-from machina.apps.forum_search.forms import PostgresSearchForm
+from machina_search.forms import PostgresSearchForm
 from machina.conf import settings
 
 
@@ -19,7 +19,7 @@ class PostgresSearchView(View):
     can use postgres search. """
 
     form_class = PostgresSearchForm
-    template = 'forum_search/search.html'
+    template = 'machina_search/search.html'
 
     def get(self, request, *args, **kwargs):
 
