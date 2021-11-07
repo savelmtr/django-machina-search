@@ -19,9 +19,10 @@ if settings.SEARCH_ENGINE == 'postgres':
     from django.contrib.postgres.search import SearchQuery, SearchRank
     from django.db.models import F
 
+
 Forum = get_model('forum', 'Forum')
 
-Post = get_model('forum_conversation', 'Post')
+Post = get_model('machina_search', 'Post')
 
 PermissionHandler = get_class('forum_permission.handler', 'PermissionHandler')
 
