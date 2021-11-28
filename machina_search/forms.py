@@ -22,7 +22,7 @@ if settings.SEARCH_ENGINE == 'postgres':
 
 Forum = get_model('forum', 'Forum')
 
-Post = get_model('machina_search', 'Post')
+Post = get_model('forum_conversation', 'Post')
 
 PermissionHandler = get_class('forum_permission.handler', 'PermissionHandler')
 
