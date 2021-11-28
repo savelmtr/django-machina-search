@@ -13,7 +13,7 @@ from machina.conf import settings as machina_settings
 from machina.apps.forum_conversation.abstract_models import AbstractPost as MachinaAbstractPost
 
 
-if machina_settings.SEARCH_ENGINE == 'postgres':
+if settings.SEARCH_ENGINE == 'postgres':
     from django.contrib.postgres.indexes import GinIndex
     from django.contrib.postgres.search import SearchVectorField
 
@@ -22,7 +22,7 @@ class AbstractPost(MachinaAbstractPost):
     """ Additions for postgres search in posts """
 
     # this fields are only for postgres search
-    if machina_settings.SEARCH_ENGINE == 'postgres':
+    if settings.SEARCH_ENGINE == 'postgres':
         search_vector_all = SearchVectorField(null=True)
         search_vector_subject = SearchVectorField(null=True)
 
@@ -36,7 +36,7 @@ class AbstractPost(MachinaAbstractPost):
 
         # let's get index for our search_vector fields
 
-        if machina_settings.SEARCH_ENGINE == 'postgres':
+        if settings.SEARCH_ENGINE == 'postgres':
             indexes = [
                 GinIndex(fields=['search_vector_all']),
                 GinIndex(fields=['search_vector_subject']),
