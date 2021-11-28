@@ -5,6 +5,7 @@ from setuptools import find_packages, setup
 
 HERE = Path(__file__).parent
 
+print(HERE)
 setup(
     name='machina_search',
 version=re.search(r"__version__\s*?=\s*?'(.*?)'", open(HERE/'machina_search/__init__.py').read()).group(1),
