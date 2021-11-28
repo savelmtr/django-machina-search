@@ -11,7 +11,7 @@ from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 
 
-class ForumSearchAppConfig(AppConfig):
+class PostgresForumSearchAppConfig(AppConfig):
     label = 'machina_search'
     name = 'machina_search'
     verbose_name = _('Machina: Forum searches')
