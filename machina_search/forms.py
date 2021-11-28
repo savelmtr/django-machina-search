@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from machina.core.db.models import get_model
 from machina.core.loading import get_class
-
+from ,models import Post
 
 if settings.SEARCH_ENGINE == 'postgres':
     from django.contrib.postgres.search import SearchQuery, SearchRank
