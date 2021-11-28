@@ -9,21 +9,11 @@
 
 from django.urls import path
 
-from machina.core.loading import get_class
-from machina.core.urls import URLPatternsFactory
+from .views import PostgresSearchView
 
 
-class ForumSearchURLPatternsFactory(URLPatternsFactory):
-    """ Allows to generate the URL patterns of the ``machina_search`` application. """
+app_name = 'machina_search'
 
-    app_namespace = 'machina_search'
-
-    search_view = get_class('machina_search.views', 'PostgresSearchView')
-    search_path = path('', search_view.as_view(), name='search')
-
-    def get_urlpatterns(self):
-        """ Returns the URL patterns managed by the considered factory / application. """
-        return [self.search_path, ]
-
-
-urlpatterns_factory = ForumSearchURLPatternsFactory()
+urlpatterns = [
+    path('', PostgresSearchView.as_view(), name='search')
+]
