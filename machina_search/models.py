@@ -43,5 +43,5 @@ class Post(MachinaAbstractPost):
                 GinIndex(fields=['search_vector_subject']),
             ]
 
-
+from machina.apps.forum_conversation.models import *  # noqa
 # class Post = model_factory(AbstractPost)
