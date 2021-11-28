@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from machina.core.db.models import get_model
 from machina.core.loading import get_class
-# from ,models import Post
+from .models import Post
 
 if settings.SEARCH_ENGINE == 'postgres':
     from django.contrib.postgres.search import SearchQuery, SearchRank
@@ -22,7 +22,7 @@ if settings.SEARCH_ENGINE == 'postgres':
 
 Forum = get_model('forum', 'Forum')
 
-Post = get_model('machina_search', 'Post')
+# Post = get_model('machina_search', 'Post')
 
 PermissionHandler = get_class('forum_permission.handler', 'PermissionHandler')
 
