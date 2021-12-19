@@ -50,7 +50,7 @@ class PostManager(models.Manager):
         '''
         return q, username_filter, forums_filter
 
-    def search(self, cleaned_data, allowed_forum_ids, page_num) -> RawQuerySet:
+    def search(self, cleaned_data: dict, allowed_forum_ids: Set[int], page_num: int) -> RawQuerySet:
 
         q, username_filter, forums_filter = self._search_helper(
             cleaned_data, allowed_forum_ids)
@@ -93,7 +93,7 @@ class PostManager(models.Manager):
             '''
         return self.raw(query)
 
-    def count_search_pages(self, cleaned_data, allowed_forum_ids) -> int:
+    def count_search_pages(self, cleaned_data: dict, allowed_forum_ids: Set[int]) -> int:
 
         q, username_filter, forums_filter = self._search_helper(
             cleaned_data, allowed_forum_ids)
