@@ -11,7 +11,7 @@ class PostsSearchIndex(models.Model):
 
     # this fields are only for postgres search
     if settings.SEARCH_ENGINE == 'postgres':
-        topic = models.ForeignKey('forum_conversation.Topic', on_delete=models.CASCADE, unique=True)
+        topic = models.IntegerField(unique=True)
         content = models.TextField()
         subject = models.CharField(max_length=255)
         search_vector_all = SearchVectorField(null=True)

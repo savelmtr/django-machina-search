@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                     ('subject', models.CharField(max_length=255)),
                     ('search_vector_all', django.contrib.postgres.search.SearchVectorField(null=True)),
                     ('search_vector_subject', django.contrib.postgres.search.SearchVectorField(null=True)),
-                    ('topic', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='forum_conversation.topic', unique=True)),
+                    ('topic', models.IntegerField(unique=True)),
                 ],
                 options={
                     'verbose_name': 'post_search_index'
