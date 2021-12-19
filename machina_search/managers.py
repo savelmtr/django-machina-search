@@ -37,21 +37,15 @@ class PostManager(models.Manager):
             AND au.username {like_operator} '%{search_poster_name}%'
         ''' if search_poster_name else ''
 
+        search_forums = cleaned_data.get('search_forums', None)
         search_forums = {
-            fid
-            for fid in cleaned_data.get(
-                'search_forums', [])
+            fid for fid in search_forums
             if fid in allowed_forum_ids and type(fid) == int
-        }
-        print('***********')
-        print(search_forums)
-        print(allowed_forum_ids)
-        print('***********')
+        } if search_forums is not None else allowed_forum_ids
         forums_filter = f'''
             AND fct.forum_id IN ({",".join(map(str, search_forums))})
-        ''' if search_forums != {} else f'''
-            AND fct.forum_id IN ({",".join(map(str, allowed_forum_ids))})
         '''
+
         return q, username_filter, forums_filter
 
     def search(self, cleaned_data: dict, allowed_forum_ids: Set[int], page_num: int) -> RawQuerySet:

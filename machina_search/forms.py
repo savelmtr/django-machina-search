@@ -86,9 +86,6 @@ class PostgresSearchForm(forms.Form):
         allowed_forum_ids = set(
             self.allowed_forums.values_list('id', flat=True))
 
-        print('***********')
-        print(allowed_forum_ids)
-        print('***********')
         result: RawQuerySet = Post.objects.search(
             self.cleaned_data, allowed_forum_ids, page_num)
         total_pages: int = Post.objects.count_search_pages(
