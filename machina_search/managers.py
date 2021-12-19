@@ -101,7 +101,7 @@ class PostManager(models.Manager):
                 cleaned_data.get('search_topics', False)
             )
             count_query = f'''
-                select count(id) as cnt
+                select count(p.id) as cnt
                 from 
                     {self._search_from_statement},
                     plainto_tsquery('{q}') query
