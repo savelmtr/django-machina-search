@@ -97,8 +97,10 @@ class PostgresSearchForm(forms.Form):
             if settings.SEARCH_ENGINE == 'postgres' else \
             'LIKE'
 
-        search_poster_name = self.cleaned_data.get(
-            'search_poster_name', None)
+        search_poster_name = query_cleaning_pttrn.sub(
+            '', 
+            self.cleaned_data.get('search_poster_name', '')
+        )
         username_filter = f'''
             AND au.username {like_operator} '%{search_poster_name}%'
         ''' if search_poster_name else ''
@@ -110,7 +112,7 @@ class PostgresSearchForm(forms.Form):
             fid
             for fid in self.cleaned_data.get(
                 'search_forums', [])
-            if fid in allowed_forum_ids
+            if fid in allowed_forum_ids and type(fid) == int
         }
         forums_filter = f'''
             AND fct.forum_id IN ({",".join(map(str, search_forums))})
