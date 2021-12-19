@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
         ('machina_search', '0001_initial'),
     ]
 
-    if settings.SEARCH_ENGINE == 'postgres':
+    if settings.SEARCH_ENGINE == 'postgres' and False:
         operations = [
             migrations.RunSQL(
                     sql='''
