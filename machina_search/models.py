@@ -1,3 +1,4 @@
+from typing import Tuple
 from machina_search import settings
 from django.db import models
 
@@ -11,7 +12,7 @@ class PostsSearchIndex(models.Model):
 
     # this fields are only for postgres search
     if settings.SEARCH_ENGINE == 'postgres':
-        topic = models.IntegerField(unique=True)
+        topic = models.IntegerField(unique=True, primary_key=True)
         search_vector_all = SearchVectorField(null=True)
         search_vector_subject = SearchVectorField(null=True)
 

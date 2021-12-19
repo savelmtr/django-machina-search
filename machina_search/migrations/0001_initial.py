@@ -16,8 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PostsSearchIndex',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('topic', models.IntegerField(unique=True)),
+                ('topic', models.IntegerField(unique=True, primary_key=True)),
                 ('search_vector_all', django.contrib.postgres.search.SearchVectorField(null=True)),
                 ('search_vector_subject', django.contrib.postgres.search.SearchVectorField(null=True)),
             ],
