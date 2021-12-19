@@ -5,10 +5,19 @@ from django.conf import settings
 from typing import Tuple, Set
 from django.db.models.query import RawQuerySet
 
+
 query_cleaning_pttrn = re.compile(r'[^\s\w\d]')
 
 
 class PostManager(models.Manager):
+
+    _search_from_statement = '''
+        forum_conversation_post p
+            left join auth_user au
+                on p.poster_id = au.id
+            left join forum_conversation_topic fct
+                on p.topic_id = fct.id
+    '''
 
     def _search_helper(
         self, cleaned_data: dict, allowed_forum_ids: Set[int]) -> Tuple[str, str, str]:
@@ -48,7 +57,7 @@ class PostManager(models.Manager):
 
         per_page = settings.TOPIC_POSTS_NUMBER_PER_PAGE
         start = page_num * per_page - per_page
-
+        
         if settings.SEARCH_ENGINE == 'postgres':
             search_vector_field = self._get_vector_field(
                 cleaned_data.get('search_topics', None)
@@ -58,11 +67,7 @@ class PostManager(models.Manager):
                     *,
                     ts_rank_cd({search_vector_field}, query) as rank
                 from
-                    forum_conversation_post p
-                        left join auth_user au
-                            on p.poster_id = au.id
-                        left join forum_conversation_topic fct
-                            on p.topic_id = fct.id,
+                    {self._search_from_statement},
                     plainto_tsquery({q}) query
                 where
                     query @@ {search_vector_field}
@@ -78,11 +83,7 @@ class PostManager(models.Manager):
             query = f'''
                 select *
                 from
-                    forum_conversation_post p
-                        left join auth_user au
-                            on p.poster_id = au.id
-                        left join forum_conversation_topic fct
-                            on p.topic_id = fct.id
+                    {self._search_from_statement}
                 where
                     {search_filter}
                     {username_filter}
@@ -103,7 +104,9 @@ class PostManager(models.Manager):
             )
             count_query = f'''
                 select count(id) as cnt
-                from forum_conversation_post, plainto_tsquery('{q}') query
+                from 
+                    {self._search_from_statement},
+                    plainto_tsquery('{q}') query
                 where
                     query @@ {search_vector_field}
                     {username_filter}
@@ -114,7 +117,7 @@ class PostManager(models.Manager):
                 q, cleaned_data.get('search_topics', None))
             count_query = f'''
                 select count(id) as cnt
-                from forum_conversation_post
+                from {self._search_from_statement}
                 where
                     {search_filter}
                     {username_filter}
