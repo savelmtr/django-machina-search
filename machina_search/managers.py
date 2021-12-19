@@ -90,7 +90,13 @@ class PostManager(models.Manager):
                 order by p.updated desc
                 limit {per_page} offset {start}
             '''
-        return self.raw(query)
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            columns = [col[0] for col in cursor.description]
+            return [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+            ]
 
     def count_search_pages(self, cleaned_data: dict, allowed_forum_ids: Set[int]) -> int:
 
