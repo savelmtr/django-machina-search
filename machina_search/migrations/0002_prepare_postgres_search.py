@@ -7,7 +7,7 @@ from machina_search import settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('forum_conversation', '0011_remove_post_poster_ip'),
+        ('machina_search', '0001_initial'),
     ]
 
     if settings.SEARCH_ENGINE == 'postgres':
