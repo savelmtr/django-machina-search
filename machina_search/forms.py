@@ -19,6 +19,7 @@ from django.db.models.query import RawQuerySet
 Forum = get_model('forum', 'Forum')
 
 Post = get_model('forum_conversation', 'Post')
+print(Post)
 Post.objects = PostManager()
 
 PermissionHandler = get_class('forum_permission.handler', 'PermissionHandler')
