@@ -41,7 +41,7 @@ class PostManager(models.Manager):
         search_forums = {
             fid for fid in search_forums
             if fid in allowed_forum_ids and type(fid) == int
-        } if search_forums is not None else allowed_forum_ids
+        } if search_forums else allowed_forum_ids
         forums_filter = f'''
             AND fct.forum_id IN ({",".join(map(str, search_forums))})
         '''
