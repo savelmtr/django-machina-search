@@ -89,7 +89,7 @@ class PostManager(models.Manager):
                 order by p.updated desc
                 limit {per_page} offset {start}
             '''
-        return self.raw(query).all()
+        return self.raw(query)
 
     def count_search_pages(self, cleaned_data: dict, allowed_forum_ids: Set[int]) -> int:
 
@@ -121,7 +121,7 @@ class PostManager(models.Manager):
                     {username_filter}
                     {forums_filter}
             '''
-        total_items_in_response = self.raw(count_query).all()
+        total_items_in_response = self.raw(count_query)[0]
         print('*********',total_items_in_response, '***********')
         return int(total_items_in_response / per_page
             if not total_items_in_response % per_page else
