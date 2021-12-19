@@ -93,4 +93,4 @@ class PostgresSearchForm(forms.Form):
         total_pages = Post.objects.count_search_pages(
             self.cleaned_data, allowed_forum_ids)
 
-        return result, int(total_pages)
+        return result, total_pages

@@ -3,6 +3,7 @@ from django.db import models
 import re
 from django.conf import settings
 from typing import Tuple, Set
+from django.db.models.query import RawQuerySet
 
 query_cleaning_pttrn = re.compile(r'[^\s\w\d]')
 
@@ -40,7 +41,7 @@ class PostManager(models.Manager):
         '''
         return q, username_filter, forums_filter
 
-    def search(self, cleaned_data, allowed_forum_ids, page_num):
+    def search(self, cleaned_data, allowed_forum_ids, page_num) -> RawQuerySet:
 
         q, username_filter, forums_filter = self._search_helper(
             cleaned_data, allowed_forum_ids)
@@ -119,10 +120,10 @@ class PostManager(models.Manager):
                     {username_filter}
                     {forums_filter}
             '''
-        total_items_in_response = self.raw(count_query)[0]
-        return total_items_in_response / per_page \
-            if not total_items_in_response % per_page else \
-            total_items_in_response // per_page + 1
+        total_items_in_response = self.raw(count_query)[0][0]
+        return int(total_items_in_response / per_page
+            if not total_items_in_response % per_page else
+            total_items_in_response // per_page + 1)
 
     def _get_search_filter(self, q, search_topics) -> str:
         return f'''
