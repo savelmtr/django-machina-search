@@ -7,24 +7,19 @@
 """
 
 from django import forms
-from django.contrib.postgres import search
-from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from django.conf import settings
 from machina.core.db.models import get_model
 from machina.core.loading import get_class
-# from .models import Post
-
-if settings.SEARCH_ENGINE == 'postgres':
-    from django.contrib.postgres.search import SearchQuery, SearchRank
-    from django.db.models import F
+from .managers import PostManager
 import re
 
 
 Forum = get_model('forum', 'Forum')
 
 Post = get_model('forum_conversation', 'Post')
+Post.objects = PostManager()
 
 PermissionHandler = get_class('forum_permission.handler', 'PermissionHandler')
 
@@ -75,7 +70,7 @@ class PostgresSearchForm(forms.Form):
         )
         if self.allowed_forums:
             self.fields['search_forums'].choices = [
-                (f.id, '{} {}'.format('-' * f.margin_level, f.name)) 
+                (f.id, '{} {}'.format('-' * f.margin_level, f.name))
                 for f in self.allowed_forums
             ]
         else:
@@ -90,110 +85,12 @@ class PostgresSearchForm(forms.Form):
         if not self.is_valid() or not self.cleaned_data.get('q'):
             return self.no_query_found()
 
-        q = query_cleaning_pttrn.sub('', self.cleaned_data['q'])
-
-        like_operator = \
-            'ILIKE' \
-            if settings.SEARCH_ENGINE == 'postgres' else \
-            'LIKE'
-
-        search_poster_name = query_cleaning_pttrn.sub(
-            '', 
-            self.cleaned_data.get('search_poster_name', '')
-        )
-        username_filter = f'''
-            AND au.username {like_operator} '%{search_poster_name}%'
-        ''' if search_poster_name else ''
-
         allowed_forum_ids = set(
             self.allowed_forums.values_list('id', flat=True))
 
-        search_forums = {
-            fid
-            for fid in self.cleaned_data.get(
-                'search_forums', [])
-            if fid in allowed_forum_ids and type(fid) == int
-        }
-        forums_filter = f'''
-            AND fct.forum_id IN ({",".join(map(str, search_forums))})
-        ''' if search_forums != {} else f'''
-            AND fct.forum_id IN ({",".join(map(str, allowed_forum_ids))})
-        '''
+        result = Post.objects.search(
+            self.cleaned_data, allowed_forum_ids, page_num)
+        total_pages = Post.objects.count_search_pages(
+            self.cleaned_data, allowed_forum_ids)
 
-        per_page = settings.TOPIC_POSTS_NUMBER_PER_PAGE
-        start = page_num * per_page
-
-        if settings.SEARCH_ENGINE == 'postgres':
-
-            search_vector_field = \
-                'search_vector_subject' \
-                if self.cleaned_data.get('search_topics', None) else \
-                'search_vector_all'
-            count_query = f'''
-                select count(id) as cnt
-                from forum_conversation_post, plainto_tsquery('{q}') query
-                where
-                    query @@ {search_vector_field}
-                    {username_filter}
-                    {forums_filter}
-            '''
-            query = f'''
-                select 
-                    *,
-                    ts_rank_cd({search_vector_field}, query) as rank
-                from 
-                    forum_conversation_post p 
-                        left join auth_user au
-                            on p.poster_id = au.id
-                        left join forum_conversation_topic fct
-                            on p.topic_id = fct.id,
-                    plainto_tsquery('дальние огни') query
-                where
-                    query @@ {search_vector_field}
-                    {username_filter}
-                    {forums_filter}
-                order by rank desc
-                limit {per_page} offset {start}
-            '''
-            total_items_in_response = Post.objects.raw(count_query)[0]
-
-        else:
-            search_filter = \
-                f'''
-                    p.subject LIKE '%{q}%'
-                ''' \
-                if self.cleaned_data.get('search_topics', None) else \
-                f'''
-                    (p.subject LIKE '%{q}%'
-                    or p.content LIKE '%{q}%')
-                '''
-            count_query = f'''
-                select count(id) as cnt
-                from forum_conversation_post
-                where
-                    {search_filter}
-                    {username_filter}
-                    {forums_filter}
-            '''
-            query = f'''
-                select *
-                from
-                    forum_conversation_post p 
-                        left join auth_user au
-                            on p.poster_id = au.id
-                        left join forum_conversation_topic fct
-                            on p.topic_id = fct.id
-                where
-                    {search_filter}
-                    {username_filter}
-                    {forums_filter}
-                order by p.updated desc
-                limit {per_page} offset {start}
-            '''
-            total_items_in_response = Post.objects.raw(count_query)[0]
-
-        total_pages = \
-            total_items_in_response / per_page \
-            if not total_items_in_response % per_page else \
-            total_items_in_response // per_page + 1
-        return Post.objects.raw(query), int(total_pages)
+        return result, int(total_pages)
