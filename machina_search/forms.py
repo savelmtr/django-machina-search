@@ -6,6 +6,7 @@
 
 """
 
+from typing import Tuple
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -13,7 +14,7 @@ from django.conf import settings
 from machina.core.db.models import get_model
 from machina.core.loading import get_class
 from .managers import PostManager
-import re
+from django.db.models.query import RawQuerySet
 
 
 Forum = get_model('forum', 'Forum')
@@ -22,8 +23,6 @@ Post = get_model('forum_conversation', 'Post')
 Post.objects = PostManager()
 
 PermissionHandler = get_class('forum_permission.handler', 'PermissionHandler')
-
-query_cleaning_pttrn = re.compile(r'[^\s\w\d]')
 
 
 class PostgresSearchForm(forms.Form):
@@ -78,9 +77,9 @@ class PostgresSearchForm(forms.Form):
             del self.fields['search_forums']
 
     def no_query_found(self):
-        return None
+        return None, 0
 
-    def search(self, page_num):
+    def search(self, page_num: int) -> Tuple[RawQuerySet, int]:
 
         if not self.is_valid() or not self.cleaned_data.get('q'):
             return self.no_query_found()
@@ -88,9 +87,9 @@ class PostgresSearchForm(forms.Form):
         allowed_forum_ids = set(
             self.allowed_forums.values_list('id', flat=True))
 
-        result = Post.objects.search(
+        result: RawQuerySet = Post.objects.search(
             self.cleaned_data, allowed_forum_ids, page_num)
-        total_pages = Post.objects.count_search_pages(
+        total_pages: int = Post.objects.count_search_pages(
             self.cleaned_data, allowed_forum_ids)
 
         return result, total_pages
