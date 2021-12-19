@@ -4,6 +4,7 @@ from django.conf import settings
 from typing import Tuple, Set, Optional
 from django.db.models.query import RawQuerySet
 from machina_search import settings
+from django.db import connection
 
 
 query_cleaning_pttrn = re.compile(r'[^\s\w\d]')
@@ -121,9 +122,9 @@ class PostManager(models.Manager):
                     {username_filter}
                     {forums_filter}
             '''
-        print(self)
-        total_items_in_response = [r for r in self.raw(count_query)]
-        print('*********',total_items_in_response, '***********')
+        with connection.cursor() as cursor:
+            cursor.execute(count_query)
+            total_items_in_response = int(cursor.fetchone()[0])
         return int(total_items_in_response / per_page
             if not total_items_in_response % per_page else
             total_items_in_response // per_page + 1)
