@@ -2,7 +2,7 @@ from django.contrib.postgres import search
 from django.db import models
 import re
 from django.conf import settings
-from typing import Tuple, Set
+from typing import Tuple, Set, Optional
 from django.db.models.query import RawQuerySet
 
 
@@ -60,7 +60,7 @@ class PostManager(models.Manager):
         
         if settings.SEARCH_ENGINE == 'postgres':
             search_vector_field = self._get_vector_field(
-                cleaned_data.get('search_topics', None)
+                cleaned_data.get('search_topics', False)
             )
             query = f'''
                 select
@@ -78,7 +78,7 @@ class PostManager(models.Manager):
             '''
         else:
             search_filter = self._get_search_filter(
-                q, cleaned_data.get('search_topics', None)
+                q, cleaned_data.get('search_topics', False)
             )
             query = f'''
                 select *
@@ -100,7 +100,7 @@ class PostManager(models.Manager):
         per_page = settings.TOPIC_POSTS_NUMBER_PER_PAGE
         if settings.SEARCH_ENGINE == 'postgres':
             search_vector_field = self._get_vector_field(
-                cleaned_data.get('search_topics', None)
+                cleaned_data.get('search_topics', False)
             )
             count_query = f'''
                 select count(id) as cnt
@@ -114,7 +114,7 @@ class PostManager(models.Manager):
             '''
         else:
             search_filter = self._get_search_filter(
-                q, cleaned_data.get('search_topics', None))
+                q, cleaned_data.get('search_topics', False))
             count_query = f'''
                 select count(id) as cnt
                 from {self._search_from_statement}
@@ -128,7 +128,7 @@ class PostManager(models.Manager):
             if not total_items_in_response % per_page else
             total_items_in_response // per_page + 1)
 
-    def _get_search_filter(self, q, search_topics) -> str:
+    def _get_search_filter(self, q: str, search_topics: Optional[bool]) -> str:
         return f'''
             p.subject LIKE '%{q}%'
         ''' \
@@ -138,7 +138,7 @@ class PostManager(models.Manager):
             or p.content LIKE '%{q}%')
         '''
 
-    def _get_vector_field(self, search_topics) -> str:
+    def _get_vector_field(self, search_topics: Optional[bool]) -> str:
         return 'search_vector_subject' \
             if search_topics else \
             'search_vector_all'
