@@ -18,6 +18,8 @@ class PostManager(models.Manager):
                 on p.poster_id = au.id
             left join forum_conversation_topic fct
                 on p.topic_id = fct.id
+            left join forum_forum ff
+                on fct.forum_id = ff.id
     '''
 
     def _search_helper(
@@ -57,13 +59,27 @@ class PostManager(models.Manager):
         per_page = settings.TOPIC_POSTS_NUMBER_PER_PAGE
         start = page_num * per_page - per_page
         
+        select_query = '''
+            fct.forum_id as forum_id,
+            p.poster_id as poster_id,
+            au.username as username,
+            p.created as created,
+            p._content_rendered as content_rendered,
+            ff.slug as forum_slug,
+            ff.id as forum_pk,
+            fct.slug as topic_slug,
+            fct.id as topic_pk,
+            p.id as pk,
+            p.subject as subject,
+            p.content as content
+        '''
         if settings.SEARCH_ENGINE == 'postgres':
             search_vector_field = self._get_vector_field(
                 cleaned_data.get('search_topics', False)
             )
             query = f'''
                 select
-                    *,
+                    {select_query},
                     ts_rank_cd({search_vector_field}, query) as rank
                 from
                     {self._search_from_statement},
@@ -80,7 +96,7 @@ class PostManager(models.Manager):
                 q, cleaned_data.get('search_topics', False)
             )
             query = f'''
-                select *
+                select {select_query}
                 from
                     {self._search_from_statement}
                 where
