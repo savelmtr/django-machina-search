@@ -68,7 +68,7 @@ class PostManager(models.Manager):
                     ts_rank_cd({search_vector_field}, query) as rank
                 from
                     {self._search_from_statement},
-                    plainto_tsquery({q}) query
+                    plainto_tsquery('{q}') query
                 where
                     query @@ {search_vector_field}
                     {username_filter}
