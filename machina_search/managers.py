@@ -43,6 +43,10 @@ class PostManager(models.Manager):
                 'search_forums', [])
             if fid in allowed_forum_ids and type(fid) == int
         }
+        print('***********')
+        print(search_forums)
+        print(allowed_forum_ids)
+        print('***********')
         forums_filter = f'''
             AND fct.forum_id IN ({",".join(map(str, search_forums))})
         ''' if search_forums != {} else f'''
