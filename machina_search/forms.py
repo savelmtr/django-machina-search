@@ -10,7 +10,6 @@ from typing import Tuple
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from django.conf import settings
 from machina.core.db.models import get_model
 from machina.core.loading import get_class
 from .managers import PostManager

@@ -1,9 +1,9 @@
-from django.contrib.postgres import search
 from django.db import models
 import re
 from django.conf import settings
 from typing import Tuple, Set, Optional
 from django.db.models.query import RawQuerySet
+from machina_search import settings
 
 
 query_cleaning_pttrn = re.compile(r'[^\s\w\d]')
