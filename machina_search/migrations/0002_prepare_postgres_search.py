@@ -17,40 +17,31 @@ class Migration(migrations.Migration):
                     CREATE FUNCTION update_search_table() RETURNS trigger AS $machina_search_postssearchindex$
                         BEGIN
                             IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
-                                INSERT into machina_search_postssearchindex (topic, subject, content)
-                                SELECT NEW.id, NEW.subject, NEW.content
+                                INSERT into machina_search_postssearchindex 
+                                    (topic, search_vector_all, search_vector_subject)
+                                SELECT
+                                    NEW.id,
+                                    setweight(to_tsvector('pg_catalog.{0}', coalesce(NEW.subject, '')), 'A') ||
+                                    setweight(to_tsvector('pg_catalog.{0}', coalesce(NEW.content, '')), 'B'),
+                                    to_tsvector('pg_catalog.{0}', coalesce(NEW.subject, ''))
                                 ON CONFLICT ("topic") 
-                                DO UPDATE SET "subject" = EXCLUDED.subject, "content" = EXCLUDED.content;
+                                DO UPDATE SET
+                                    "search_vector_all" = EXCLUDED.search_vector_all,
+                                    "search_vector_subject" = EXCLUDED.search_vector_subject;
                             END IF;    
                             RETURN NEW;
                         END;
                     $machina_search_postssearchindex$ LANGUAGE plpgsql;
 
                     CREATE TRIGGER post_search_index_add 
-                        AFTER INSERT OR UPDATE ON forum_conversation_post
-                        FOR EACH ROW EXECUTE PROCEDURE update_search_table();
-
-                    CREATE TRIGGER post_update_trigger_all
-                    BEFORE INSERT OR UPDATE OF subject, content, search_vector_all
-                    ON machina_search_postssearchindex
-                    FOR EACH ROW EXECUTE PROCEDURE
-                    tsvector_update_trigger(
-                      search_vector_all, 'pg_catalog.{0}', subject, content);
-
-                    CREATE TRIGGER post_update_trigger_subject
-                    BEFORE INSERT OR UPDATE OF subject, search_vector_subject
-                    ON machina_search_postssearchindex
-                    FOR EACH ROW EXECUTE PROCEDURE
-                    tsvector_update_trigger(
-                      search_vector_subject, 'pg_catalog.{0}', subject);
+                    AFTER INSERT OR UPDATE ON forum_conversation_post
+                    FOR EACH ROW EXECUTE PROCEDURE update_search_table();
 
                     UPDATE machina_search_postssearchindex
                     SET search_vector_all = NULL, search_vector_subject = NULL;
                     '''.format(settings.SEARCH_LANGUAGE),
 
                     reverse_sql='''
-                    DROP TRIGGER IF EXISTS post_update_trigger_all, post_update_trigger_subject
-                    ON machina_search_postssearchindex;
                     DROP TRIGGER IF EXISTS post_search_index_add ON forum_conversation_post;
                     '''),
         ]
