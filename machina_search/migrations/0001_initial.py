@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PostsSearchIndex',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('content', models.TextField()),
                 ('subject', models.CharField(max_length=255)),
                 ('search_vector_all', django.contrib.postgres.search.SearchVectorField(null=True)),
@@ -31,10 +31,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='postssearchindex',
-            index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_all'], name='search_post_search__6dc42b_gin'),
+            index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_all'], name='machina_sea_search__36ffc7_gin'),
         ),
         migrations.AddIndex(
             model_name='postssearchindex',
-            index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_subject'], name='search_post_search__e2c975_gin'),
+            index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_subject'], name='machina_sea_search__a65633_gin'),
         ),
     ]
