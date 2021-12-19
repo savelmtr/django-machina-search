@@ -17,9 +17,9 @@ class Migration(migrations.Migration):
                     CREATE FUNCTION update_search_table() RETURNS trigger AS $machina_search_postssearchindex$
                         BEGIN
                             IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
-                                INSERT into machina_search_postssearchindex (topic_id, subject, content)
+                                INSERT into machina_search_postssearchindex (topic, subject, content)
                                 SELECT NEW.id, NEW.subject, NEW.content
-                                ON CONFLICT ("topic_id") 
+                                ON CONFLICT ("topic") 
                                 DO UPDATE SET "subject" = EXCLUDED.subject, "content" = EXCLUDED.content;
                             END IF;    
                             RETURN NEW;
