@@ -62,7 +62,7 @@ class PostManager(models.Manager):
                             on p.poster_id = au.id
                         left join forum_conversation_topic fct
                             on p.topic_id = fct.id,
-                    plainto_tsquery('дальние огни') query
+                    plainto_tsquery({q}) query
                 where
                     query @@ {search_vector_field}
                     {username_filter}
