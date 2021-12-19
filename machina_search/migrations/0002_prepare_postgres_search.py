@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                                 INSERT into machina_search_post_search_index (topic_id, subject, content)
                                 SELECT NEW.id, NEW.subject, NEW.content
                                 ON CONFLICT ("topic_id") 
-                                DO UPDATE SET ("subject" = EXCLUDED.subject, "content" = EXCLUDED.content);
+                                DO UPDATE SET "subject" = EXCLUDED.subject, "content" = EXCLUDED.content;
                             END IF;    
                             RETURN NEW;
                         END;
