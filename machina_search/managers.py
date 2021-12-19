@@ -102,7 +102,6 @@ class PostManager(models.Manager):
 
         q, username_filter, forums_filter = self._search_helper(
             cleaned_data, allowed_forum_ids)
-        per_page = settings.TOPIC_POSTS_NUMBER_PER_PAGE
         if settings.SEARCH_ENGINE == 'postgres':
             search_vector_field = self._get_vector_field(
                 cleaned_data.get('search_topics', False)
@@ -131,9 +130,7 @@ class PostManager(models.Manager):
         with connection.cursor() as cursor:
             cursor.execute(count_query)
             total_items_in_response = int(cursor.fetchone()[0])
-        return int(total_items_in_response / per_page
-            if not total_items_in_response % per_page else
-            total_items_in_response // per_page + 1)
+        return int(total_items_in_response)
 
     def _get_search_filter(self, q: str, search_topics: Optional[bool]) -> str:
         return f'''
