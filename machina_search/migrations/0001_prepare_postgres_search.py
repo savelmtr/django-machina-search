@@ -2,9 +2,6 @@
 
 from django.db import migrations
 from django.conf import settings
-if settings.SEARCH_ENGINE == 'postgres':
-    import django.contrib.postgres.indexes
-    import django.contrib.postgres.search
 
 
 class Migration(migrations.Migration):
@@ -15,28 +12,22 @@ class Migration(migrations.Migration):
 
     if settings.SEARCH_ENGINE == 'postgres':
         operations = [
-            migrations.AddField(
-                model_name='post',
-                name='search_vector_all',
-                field=django.contrib.postgres.search.SearchVectorField(null=True),
-            ),
-            migrations.AddField(
-                model_name='post',
-                name='search_vector_subject',
-                field=django.contrib.postgres.search.SearchVectorField(null=True),
-            ),
-            migrations.AddIndex(
-                model_name='post',
-                index=django.contrib.postgres.indexes.GinIndex(
-                    fields=['search_vector_all'], name='forum_conve_search__8a09bd_gin'),
-            ),
-            migrations.AddIndex(
-                model_name='post',
-                index=django.contrib.postgres.indexes.GinIndex(
-                    fields=['search_vector_subject'], name='forum_conve_search__be2f8f_gin'),
-            ),
             migrations.RunSQL(
                     sql='''
+                    ALTER TABLE forum_conversation_post
+                    ADD COLUMN search_vector_all tsvector;
+
+                    ALTER TABLE forum_conversation_post
+                    ADD COLUMN search_vector_subject tsvector;
+
+                    CREATE INDEX post_search_idx
+                    ON forum_conversation_post
+                    USING GIN (search_vector_all);
+
+                    CREATE INDEX post_subject_search_idx
+                    ON forum_conversation_post
+                    USING GIN (search_vector_subject);
+
                     CREATE TRIGGER post_update_trigger_all
                     BEFORE INSERT OR UPDATE OF subject, content, search_vector_all
                     ON forum_conversation_post
@@ -51,10 +42,16 @@ class Migration(migrations.Migration):
                     tsvector_update_trigger(
                       search_vector_subject, 'pg_catalog.{0}', subject);
 
-                    UPDATE forum_conversation_post SET search_vector_all = NULL, search_vector_subject = NULL;
+                    UPDATE forum_conversation_post
+                    SET search_vector_all = NULL, search_vector_subject = NULL;
                     '''.format(settings.SEARCH_LANGUAGE),
 
                     reverse_sql='''
+                    ALTER TABLE forum_conversation_post
+                        DROP COLUMN IF EXISTS search_vector_all,
+                        DROP COLUMN IF EXISTS search_vector_subject;
+                    DROP INDEX IF EXISTS post_search_idx;
+                    DROP INDEX IF EXISTS post_subject_search_idx;
                     DROP TRIGGER IF EXISTS post_update_trigger_all, post_update_trigger_subject
                     ON forum_conversation_post;
                     '''),
