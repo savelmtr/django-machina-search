@@ -15,8 +15,10 @@ from machina.conf import settings
 
 
 class PostgresSearchView(View):
-    """ Allows to search within forums,
-    can use postgres search. """
+    """
+        Allows to search within forums,
+        can use postgres search.
+    """
 
     form_class = PostgresSearchForm
     template = 'machina_search/search.html'
@@ -26,19 +28,13 @@ class PostgresSearchView(View):
         form = self.form_class(request)
 
         if 'q' in request.GET:
-            result = form.search() # FIXME: return quantity of page and make limit in sql request
-            paginator = Paginator(result, settings.TOPIC_POSTS_NUMBER_PER_PAGE)
-            page_num = request.GET['page'] if 'page' in request.GET else 1
-            try:
-                page = paginator.page(page_num)
-            except Exception:
-                page = None
+            page_num = request.GET.get('page', 1)
+            result, total_pages = form.search(page_num)
             context = {
                 'form': form,
-                'result_count': len(result) if result else 0,
+                'result_count': total_pages,
                 'query': form.cleaned_data.get('q'),
-                'page': page,
-                'paginator': paginator,
+                'page': result
             }
         else:
             context = {

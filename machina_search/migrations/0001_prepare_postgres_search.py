@@ -27,11 +27,13 @@ class Migration(migrations.Migration):
             ),
             migrations.AddIndex(
                 model_name='post',
-                index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_all'], name='forum_conve_search__8a09bd_gin'),
+                index=django.contrib.postgres.indexes.GinIndex(
+                    fields=['search_vector_all'], name='forum_conve_search__8a09bd_gin'),
             ),
             migrations.AddIndex(
                 model_name='post',
-                index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_subject'], name='forum_conve_search__be2f8f_gin'),
+                index=django.contrib.postgres.indexes.GinIndex(
+                    fields=['search_vector_subject'], name='forum_conve_search__be2f8f_gin'),
             ),
             migrations.RunSQL(
                     sql='''
