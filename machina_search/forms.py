@@ -18,9 +18,6 @@ from django.db.models.query import RawQuerySet
 
 Forum = get_model('forum', 'Forum')
 
-Post = get_model('forum_conversation', 'Post')
-Post.objects = PostManager()
-
 PermissionHandler = get_class('forum_permission.handler', 'PermissionHandler')
 
 
@@ -83,12 +80,6 @@ class PostgresSearchForm(forms.Form):
         if not self.is_valid() or not self.cleaned_data.get('q'):
             return self.no_query_found()
 
-        allowed_forum_ids = set(
-            self.allowed_forums.values_list('id', flat=True))
 
-        result: RawQuerySet = Post.objects.search(
-            self.cleaned_data, allowed_forum_ids, page_num)
-        count_results: int = Post.objects.count_search_pages(
-            self.cleaned_data, allowed_forum_ids)
 
-        return result, count_results
+        return [], 0
