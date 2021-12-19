@@ -121,7 +121,8 @@ class PostManager(models.Manager):
                     {username_filter}
                     {forums_filter}
             '''
-        total_items_in_response = self.raw(count_query)[0][0]
+        total_items_in_response = self.raw(count_query)
+        print('*********',total_items_in_response, '***********')
         return int(total_items_in_response / per_page
             if not total_items_in_response % per_page else
             total_items_in_response // per_page + 1)
