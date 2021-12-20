@@ -28,13 +28,17 @@ class Migration(migrations.Migration):
                                 DO UPDATE SET
                                     "search_vector_all" = EXCLUDED.search_vector_all,
                                     "search_vector_subject" = EXCLUDED.search_vector_subject;
-                            END IF;    
+                            ELSIF (TG_OP = 'DELETE') THEN
+                                DELETE FROM machina_search_postssearchindex
+                                WHERE topic = OLD.id;
+                                RETURN OLD;
+                            END IF;
                             RETURN NEW;
                         END;
                     $machina_search_postssearchindex$ LANGUAGE plpgsql;
 
                     CREATE TRIGGER post_search_index_add 
-                    AFTER INSERT OR UPDATE ON forum_conversation_post
+                    AFTER INSERT OR UPDATE OR DELETE ON forum_conversation_post
                     FOR EACH ROW EXECUTE PROCEDURE update_search_table();
 
                     UPDATE machina_search_postssearchindex
