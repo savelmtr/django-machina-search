@@ -95,7 +95,7 @@ class PostgresSearchForm(forms.Form):
             fid for fid in search_forums
             if fid in allowed_forums_ids
         } if len(search_forums) else allowed_forums_ids
-        print(q,poster_name,search_forums,self.cleaned_data['search_topics'])
+
         result = PostsSearchIndex.objects.search(
             q=q,
             poster_name=poster_name,

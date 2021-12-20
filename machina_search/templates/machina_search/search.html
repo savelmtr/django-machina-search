@@ -77,7 +77,9 @@
         {% for result in results %}
           <tr>
             <td class="post-name">
-              <a href="{% url 'forum_conversation:topic' result.forum_slug result.forum_pk result.topic_slug result.topic_pk %}?post={{ result.pk }}#{{ result.pk }}" class="topic-name-link">{{ result.subject }}</a>
+              <a href="{% url 'forum_conversation:topic' result.forum_slug result.forum_pk result.topic_slug result.topic_pk %}?post={{ result.pk }}#{{ result.pk }}" class="topic-name-link">
+                {{ result.subject }}
+              </a>
               <div>
                 <div class="post-created">
                   {% if result.poster_id %}
