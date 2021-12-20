@@ -83,35 +83,29 @@ class PostgresSearchForm(forms.Form):
 
         if not self.is_valid() or not self.cleaned_data['q']:
             return self.no_query_found()
-
+        if self.cleaned_data['q']:
+            q = self.query_cleaning_pttrn.sub(
+                '', self.cleaned_data['q'])
+        if self.cleaned_data['search_poster_name']:
+            poster_name = self.query_cleaning_pttrn.sub(
+                '', self.cleaned_data['search_poster_name'])
         search_forums = self.cleaned_data.get('search_forums', None)
         search_forums = {
             fid for fid in search_forums
             if fid in self.allowed_forum_ids
         } if search_forums else self.allowed_forum_ids
-
+        print(q,poster_name,search_forums,self.cleaned_data['search_topics'])
         result = PostsSearchIndex.objects.search(
-            q=self.cleaned_data['q'],
-            poster_name=self.cleaned_data['search_poster_name'],
+            q=q,
+            poster_name=poster_name,
             search_forums=search_forums,
             page_num=page_num,
             search_topics=self.cleaned_data['search_topics']
         )
         total = PostsSearchIndex.objects.search_count(
-            q=self.cleaned_data['q'],
-            poster_name=self.cleaned_data['search_poster_name'],
+            q=q,
+            poster_name=poster_name,
             search_forums=search_forums,
             search_topics=self.cleaned_data['search_topics']
         )
         return result, total
-
-    def clean_q(self):
-        if self.cleaned_data['q']:
-            self.cleaned_data['q'] = self.query_cleaning_pttrn.sub(
-                '', self.cleaned_data['q'])
-
-    def clean_search_poster_name(self):
-        if self.cleaned_data['search_poster_name']:
-            self.cleaned_data['search_poster_name'] = \
-                self.query_cleaning_pttrn.sub(
-                    '', self.cleaned_data['search_poster_name'])
