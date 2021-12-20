@@ -86,9 +86,9 @@ class PostgresSearchForm(forms.Form):
         if self.cleaned_data['q']:
             q = self.query_cleaning_pttrn.sub(
                 '', self.cleaned_data['q'])
-        if self.cleaned_data['search_poster_name']:
-            poster_name = self.query_cleaning_pttrn.sub(
-                '', self.cleaned_data['search_poster_name'])
+        poster_name = self.query_cleaning_pttrn.sub(
+            '', self.cleaned_data['search_poster_name']) \
+            if self.cleaned_data['search_poster_name'] else None
         search_forums = self.cleaned_data.get('search_forums', None)
         search_forums = {
             fid for fid in search_forums
