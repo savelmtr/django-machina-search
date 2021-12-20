@@ -1,11 +1,3 @@
-"""
-    Forum search views
-    ==================
-
-    This module defines views provided by the ``forum_search`` application.
-
-"""
-
 from django.shortcuts import render
 from django.views import View
 from machina_search import settings

@@ -1,5 +1,4 @@
 from django.db import models
-import re
 from django.conf import settings
 from typing import Tuple, Set, Optional
 from django.db.models.query import RawQuerySet
