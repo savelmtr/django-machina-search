@@ -70,8 +70,8 @@ class SearchManager(models.Manager):
         '''
         if settings.SEARCH_ENGINE == 'postgres':
             select_query += f", ts_headline('pg_catalog.{settings.SEARCH_LANGUAGE}'" \
-                            f", p.content , query, StartSel=<mark>, StopSel=</mark>" \
-                            f", MaxWords=40) as headline"
+                            f", p.content , query, 'StartSel=<mark>, StopSel=</mark>" \
+                            f", MaxWords=40') as headline"
             search_vector_field = self._get_vector_field(search_topics)
             query = f'''
                 select
