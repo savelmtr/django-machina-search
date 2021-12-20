@@ -69,7 +69,7 @@ class SearchManager(models.Manager):
             p.content as content
         '''
         if settings.SEARCH_ENGINE == 'postgres':
-            select_query += f"ts_headline('pg_catalog.{settings.SEARCH_LANGUAGE}'" \
+            select_query += f", ts_headline('pg_catalog.{settings.SEARCH_LANGUAGE}'" \
                             f", p.content , query) as headline"
             search_vector_field = self._get_vector_field(search_topics)
             query = f'''
