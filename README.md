@@ -36,7 +36,7 @@ After the package has installed, you may add it into `INSTALLED_APPS` in `settin
     'machina_search'
  ]
  ```
- Please, don't forget to add `'machina_search'` only **after** `machina`. It is important.
+ Please, don't forget to add `'machina_search'` only **after** `machina` apps. It is important.
 
 ## Configs
 
