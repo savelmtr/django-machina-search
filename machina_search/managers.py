@@ -13,7 +13,7 @@ if settings.SEARCH_ENGINE == 'postgres':
 
 class SearchManager(models.Manager):
 
-    search_from_statement = '''
+    _search_from_statement = '''
         left join auth_user au
             on p.poster_id = au.id
         left join forum_conversation_topic fct
