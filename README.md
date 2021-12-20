@@ -1,5 +1,5 @@
 # Django-machina search
-Search module for forum engine [django-machina](https://github.com/ellmetha/django-machina). It performs search using postgres full text search engine or sqlite icontains queries.
+Search module for forum engine [django-machina](https://github.com/ellmetha/django-machina). It performs search using postgres full text search engine or sqlite `LIKE` queries.
 
 ## Installation
 You may perform these commands in you environment:
