@@ -66,7 +66,8 @@ class SearchManager(models.Manager):
             fct.id as topic_pk,
             p.id as pk,
             p.subject as subject,
-            p.content as content
+            p.content as content,
+            p._content_rendered as content_rendered
         '''
         if settings.SEARCH_ENGINE == 'postgres':
             select_query += f", ts_headline('pg_catalog.{settings.SEARCH_LANGUAGE}'" \
