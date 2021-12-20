@@ -26,7 +26,7 @@ class PostgresSearchView(View):
         form = self.form_class(request)
 
         if 'q' in request.GET:
-            page_num = request.GET.get('page', 1)
+            page_num = int(request.GET.get('page', 1))
             result, count_results = form.search(page_num)
             per_page = settings.TOPIC_POSTS_NUMBER_PER_PAGE
             total_pages = int(count_results / per_page
