@@ -3,6 +3,7 @@
 import django.contrib.postgres.indexes
 import django.contrib.postgres.search
 from django.db import migrations, models
+from machina_search import settings
 
 
 class Migration(migrations.Migration):
