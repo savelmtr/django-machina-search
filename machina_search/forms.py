@@ -1,11 +1,3 @@
-"""
-    Forum search forms
-    ==================
-
-    This module defines forms provided by the ``forum_search`` application.
-
-"""
-
 from typing import Tuple
 from django import forms
 from django.utils.translation import gettext_lazy as _
