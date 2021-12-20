@@ -1,4 +1,3 @@
-from typing import Tuple
 from machina_search import settings
 from django.db import models
 from .managers import SearchManager

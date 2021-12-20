@@ -93,9 +93,11 @@
               </div>
             </td>
             <td class="post-content">
-            
+            {% if result.headline %}
+              {{ result.headline }}
+            {% else %}
               {{ result.content|truncatechars_html:160 }}
-            
+            {% endif %}
             </td>
           </tr>
         {% endfor %}
