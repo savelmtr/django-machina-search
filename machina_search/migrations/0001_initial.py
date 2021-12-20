@@ -11,25 +11,25 @@ class Migration(migrations.Migration):
 
     dependencies = [
     ]
-
-    operations = [
-        migrations.CreateModel(
-            name='PostsSearchIndex',
-            fields=[
-                ('topic', models.IntegerField(unique=True, primary_key=True)),
-                ('search_vector_all', django.contrib.postgres.search.SearchVectorField(null=True)),
-                ('search_vector_subject', django.contrib.postgres.search.SearchVectorField(null=True)),
-            ],
-            options={
-                'verbose_name': 'post_search_index',
-            },
-        ),
-        migrations.AddIndex(
-            model_name='postssearchindex',
-            index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_all'], name='machina_sea_search__36ffc7_gin'),
-        ),
-        migrations.AddIndex(
-            model_name='postssearchindex',
-            index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_subject'], name='machina_sea_search__a65633_gin'),
-        ),
-    ]
+    if settings.SEARCH_ENGINE == 'postgres':
+        operations = [
+            migrations.CreateModel(
+                name='PostsSearchIndex',
+                fields=[
+                    ('topic', models.IntegerField(unique=True, primary_key=True)),
+                    ('search_vector_all', django.contrib.postgres.search.SearchVectorField(null=True)),
+                    ('search_vector_subject', django.contrib.postgres.search.SearchVectorField(null=True)),
+                ],
+                options={
+                    'verbose_name': 'post_search_index',
+                },
+            ),
+            migrations.AddIndex(
+                model_name='postssearchindex',
+                index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_all'], name='machina_sea_search__36ffc7_gin'),
+            ),
+            migrations.AddIndex(
+                model_name='postssearchindex',
+                index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector_subject'], name='machina_sea_search__a65633_gin'),
+            ),
+        ]

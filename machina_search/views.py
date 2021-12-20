@@ -35,7 +35,7 @@ class PostgresSearchView(View):
             context = {
                 'form': form,
                 'result_count': count_results,
-                'query': form.cleaned_data.get('q'),
+                'query': form.cleaned_data['q'],
                 'results': result,
                 'has_previous': page_num > 1,
                 'has_next': page_num < total_pages,

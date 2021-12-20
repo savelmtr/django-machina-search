@@ -6,65 +6,60 @@ from django.db.models.query import RawQuerySet
 from machina_search import settings
 from django.db import connection
 
+if settings.SEARCH_ENGINE == 'postgres':
+    from django.contrib.postgres.search import SearchQuery, SearchRank
+    from django.db.models import F
 
-query_cleaning_pttrn = re.compile(r'[^\s\w\d]')
 
+class SearchManager(models.Manager):
 
-class PostManager(models.Manager):
-
-    _search_from_statement = '''
-        forum_conversation_post p
-            left join auth_user au
-                on p.poster_id = au.id
-            left join forum_conversation_topic fct
-                on p.topic_id = fct.id
-            left join forum_forum ff
-                on fct.forum_id = ff.id
+    search_from_statement = '''
+        left join auth_user au
+            on p.poster_id = au.id
+        left join forum_conversation_topic fct
+            on p.topic_id = fct.id
+        left join forum_forum ff
+            on fct.forum_id = ff.id
     '''
 
     def _search_helper(
-        self, cleaned_data: dict, allowed_forum_ids: Set[int]) -> Tuple[str, str, str]:
-
-        q = query_cleaning_pttrn.sub('', cleaned_data['q'])
+        self, poster_name, search_forums: Set[int]) -> Tuple[str, str, str]:
 
         like_operator = \
             'ILIKE' \
             if settings.SEARCH_ENGINE == 'postgres' else \
             'LIKE'
 
-        search_poster_name = query_cleaning_pttrn.sub(
-            '',
-            cleaned_data.get('search_poster_name', '')
-        )
         username_filter = f'''
-            AND au.username {like_operator} '%{search_poster_name}%'
-        ''' if search_poster_name else ''
+            AND au.username {like_operator} '%{poster_name}%'
+        ''' if poster_name else ''
 
-        search_forums = cleaned_data.get('search_forums', None)
-        search_forums = {
-            fid for fid in search_forums
-            if fid in allowed_forum_ids and type(fid) == int
-        } if search_forums else allowed_forum_ids
         forums_filter = f'''
             AND fct.forum_id IN ({",".join(map(str, search_forums))})
         '''
 
-        return q, username_filter, forums_filter
+        return username_filter, forums_filter
 
-    def search(self, cleaned_data: dict, allowed_forum_ids: Set[int], page_num: int) -> RawQuerySet:
+    def search(
+        self,
+        q: str,
+        poster_name: str,
+        search_forums: Set[int],
+        search_topics: bool,
+        page_num: int
+    ) -> RawQuerySet:
 
-        q, username_filter, forums_filter = self._search_helper(
-            cleaned_data, allowed_forum_ids)
+        username_filter, forums_filter = self._search_helper(
+            poster_name, search_forums)
 
         per_page = settings.TOPIC_POSTS_NUMBER_PER_PAGE
         start = page_num * per_page - per_page
         
-        select_query = '''
+        select_query = f'''
             fct.forum_id as forum_id,
             p.poster_id as poster_id,
             au.username as username,
             p.created as created,
-            p._content_rendered as content_rendered,
             ff.slug as forum_slug,
             ff.id as forum_pk,
             fct.slug as topic_slug,
@@ -74,16 +69,19 @@ class PostManager(models.Manager):
             p.content as content
         '''
         if settings.SEARCH_ENGINE == 'postgres':
-            search_vector_field = self._get_vector_field(
-                cleaned_data.get('search_topics', False)
-            )
+            select_query += f"ts_headline('pg_catalog.{settings.SEARCH_LANGUAGE}'" \
+                            f", p.content , query) as headline"
+            search_vector_field = self._get_vector_field(search_topics)
             query = f'''
                 select
                     {select_query},
                     ts_rank_cd({search_vector_field}, query) as rank
                 from
-                    {self._search_from_statement},
-                    plainto_tsquery('pg_catalog.russian', '{q}') query
+                    machina_search_postssearchindex idx
+                        left join forum_conversation_post p
+                            on idx.topic = p.id
+                        {self._search_from_statement},
+                    websearch_to_tsquery('pg_catalog.{settings.SEARCH_LANGUAGE}', '{q}') query
                 where
                     query @@ {search_vector_field}
                     {username_filter}
@@ -93,11 +91,12 @@ class PostManager(models.Manager):
             '''
         else:
             search_filter = self._get_search_filter(
-                q, cleaned_data.get('search_topics', False)
+                q, search_topics
             )
             query = f'''
                 select {select_query}
                 from
+                    forum_conversation_post p
                     {self._search_from_statement}
                 where
                     {search_filter}
@@ -114,30 +113,37 @@ class PostManager(models.Manager):
                 for row in cursor.fetchall()
             ]
 
-    def count_search_pages(self, cleaned_data: dict, allowed_forum_ids: Set[int]) -> int:
+    def search_count(
+        self,
+        q: str,
+        poster_name: str,
+        search_forums: Set[int],
+        search_topics: bool,
+    ) -> int:
 
-        q, username_filter, forums_filter = self._search_helper(
-            cleaned_data, allowed_forum_ids)
+        username_filter, forums_filter = self._search_helper(
+            poster_name, search_forums)
         if settings.SEARCH_ENGINE == 'postgres':
-            search_vector_field = self._get_vector_field(
-                cleaned_data.get('search_topics', False)
-            )
+            search_vector_field = self._get_vector_field(search_topics)
             count_query = f'''
                 select count(p.id) as cnt
                 from 
-                    {self._search_from_statement},
-                    plainto_tsquery('{q}') query
+                    machina_search_postssearchindex idx
+                        left join forum_conversation_post p
+                            on idx.topic = p.id
+                        {self._search_from_statement},
+                    websearch_to_tsquery('pg_catalog.{settings.SEARCH_LANGUAGE}', '{q}') query
                 where
                     query @@ {search_vector_field}
                     {username_filter}
                     {forums_filter}
             '''
         else:
-            search_filter = self._get_search_filter(
-                q, cleaned_data.get('search_topics', False))
+            search_filter = self._get_search_filter(q, search_topics)
             count_query = f'''
                 select count(id) as cnt
-                from {self._search_from_statement}
+                from forum_conversation_post p
+                    {self._search_from_statement}
                 where
                     {search_filter}
                     {username_filter}

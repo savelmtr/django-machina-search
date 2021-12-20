@@ -14,6 +14,8 @@ from machina.core.db.models import get_model
 from machina.core.loading import get_class
 from .managers import PostManager
 from django.db.models.query import RawQuerySet
+import re
+from .models import PostsSearchIndex
 
 
 Forum = get_model('forum', 'Forum')
@@ -22,6 +24,9 @@ PermissionHandler = get_class('forum_permission.handler', 'PermissionHandler')
 
 
 class PostgresSearchForm(forms.Form):
+
+    query_cleaning_pttrn = re.compile(r'[^\s\w\d]')
+
     q = forms.CharField(
         required=False,
         label=_('Search'),
@@ -60,9 +65,9 @@ class PostgresSearchForm(forms.Form):
         self.fields['search_poster_name'].widget.attrs['placeholder'] = \
             _('Poster name')
 
-        self.allowed_forums = PermissionHandler().get_readable_forums(
+        self.allowed_forums = set(PermissionHandler().get_readable_forums(
             Forum.objects.all(), user
-        )
+        ))
         if self.allowed_forums:
             self.fields['search_forums'].choices = [
                 (f.id, '{} {}'.format('-' * f.margin_level, f.name))
@@ -77,9 +82,37 @@ class PostgresSearchForm(forms.Form):
 
     def search(self, page_num: int) -> Tuple[RawQuerySet, int]:
 
-        if not self.is_valid() or not self.cleaned_data.get('q'):
+        if not self.is_valid() or not self.cleaned_data['q']:
             return self.no_query_found()
 
+        search_forums = self.cleaned_data.get('search_forums', None)
+        search_forums = {
+            fid for fid in search_forums
+            if fid in self.allowed_forum_ids
+        } if search_forums else self.allowed_forum_ids
 
+        result = PostsSearchIndex.objects.search(
+            q=self.cleaned_data['q'],
+            poster_name=self.cleaned_data['search_poster_name'],
+            search_forums=search_forums,
+            page_num=page_num,
+            search_topics=self.cleaned_data['search_topics']
+        )
+        total = PostsSearchIndex.objects.search_count(
+            q=self.cleaned_data['q'],
+            poster_name=self.cleaned_data['search_poster_name'],
+            search_forums=search_forums,
+            search_topics=self.cleaned_data['search_topics']
+        )
+        return result, total
 
-        return [], 0
+    def clean_q(self):
+        if self.cleaned_data['q']:
+            self.cleaned_data['q'] = self.query_cleaning_pttrn.sub(
+                '', self.cleaned_data['q'])
+
+    def clean_search_poster_name(self):
+        if self.cleaned_data['search_poster_name']:
+            self.cleaned_data['search_poster_name'] = \
+                self.query_cleaning_pttrn.sub(
+                    '', self.cleaned_data['search_poster_name'])
