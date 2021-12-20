@@ -8,4 +8,4 @@ register = template.Library()
 @register.filter
 @stringfilter
 def search_header(value):
-    return render_func(value)
+    return render_func(value).replace('[mark]', '<mark>').replace('[/mark]', '</mark>')
