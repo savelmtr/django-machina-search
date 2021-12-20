@@ -105,6 +105,7 @@ class SearchManager(models.Manager):
                 order by p.updated desc
                 limit {per_page} offset {start}
             '''
+        print(query)
         with connection.cursor() as cursor:
             cursor.execute(query)
             columns = [col[0] for col in cursor.description]
