@@ -12,7 +12,6 @@ from django.utils.translation import gettext_lazy as _
 
 from machina.core.db.models import get_model
 from machina.core.loading import get_class
-from .managers import PostManager
 from django.db.models.query import RawQuerySet
 import re
 from .models import PostsSearchIndex
