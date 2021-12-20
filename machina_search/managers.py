@@ -6,10 +6,6 @@ from django.db.models.query import RawQuerySet
 from machina_search import settings
 from django.db import connection
 
-if settings.SEARCH_ENGINE == 'postgres':
-    from django.contrib.postgres.search import SearchQuery, SearchRank
-    from django.db.models import F
-
 
 class SearchManager(models.Manager):
 
