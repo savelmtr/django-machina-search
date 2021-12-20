@@ -94,7 +94,7 @@
             </td>
             <td class="post-content">
             {% if result.headline %}
-              {{ result.headline|truncatechars_html:160 }}
+              {{ result.headline|safe }}
             {% else %}
               {{ result.content|truncatechars_html:160 }}
             {% endif %}
