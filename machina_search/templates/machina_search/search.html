@@ -1,5 +1,6 @@
 {% extends 'machina/board_base.html' %}
 {% load i18n %}
+{% load machina_search_tags %}
 
 {% block sub_title %}{% trans "Search" %}{% endblock sub_title %}
 
@@ -94,7 +95,7 @@
             </td>
             <td class="post-content">
             {% if result.headline %}
-              {{ result.headline|safe }}
+              {{ result.headline|search_header|safe }}
             {% else %}
               {{ result.content|truncatechars_html:160 }}
             {% endif %}
