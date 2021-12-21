@@ -33,15 +33,12 @@ class Migration(migrations.Migration):
                                 DELETE FROM machina_search_postssearchindex
                                 WHERE topic = OLD.id;
                                 RETURN OLD;
-                            ELSIF (TG_OP = 'TRUNCATE') THEN
-                                TRUNCATE machina_search_postssearchindex;
-                                RETURN NULL;
                             END IF;
                         END;
                     $machina_search_postssearchindex$ LANGUAGE plpgsql;
 
                     CREATE TRIGGER post_search_index_add 
-                    AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE ON forum_conversation_post
+                    AFTER INSERT OR UPDATE OR DELETE ON forum_conversation_post
                     FOR EACH ROW EXECUTE PROCEDURE update_search_table();
 
                     UPDATE machina_search_postssearchindex
