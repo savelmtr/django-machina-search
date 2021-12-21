@@ -5,4 +5,4 @@ TOPIC_POSTS_NUMBER_PER_PAGE = getattr(machina_conf, 'TOPIC_POSTS_NUMBER_PER_PAGE
 SEARCH_ENGINE = 'postgres' \
     if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql' else \
     'default'
-SEARCH_LANGUAGE = getattr(settings, 'SEARCH_LANGUAGE', 'english')
+SEARCH_LANGUAGE = getattr(settings, 'SEARCH_LANGUAGE', 'default')
