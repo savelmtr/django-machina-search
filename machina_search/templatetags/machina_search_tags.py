@@ -14,10 +14,9 @@ def search_header(value: str) -> str:
 
 @register.simple_tag(takes_context=True)
 def insert_page_in_url(context: dict, num: int) -> str:
-    print(context['request'].get_full_path)
-    print(context['request'].get_full_path())
     url = context['request'].get_full_path()
     if 'page=' in url:
         url = re.sub(r'page=\d*', f'page={num}', url)
     else:
         url += f'&page={num}'
+    return url
