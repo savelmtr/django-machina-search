@@ -16,6 +16,6 @@ def search_header(value: str) -> str:
 def insert_page_in_url(context: dict, num: int) -> str:
     url = context['request'].get_full_path()
     if 'page=' in url:
-    url = re.sub(r'page=\d*', f'page={num}', url)
+        url = re.sub(r'page=\d*', f'page={num}', url)
     else:
         url += f'&page={num}'
