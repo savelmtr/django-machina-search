@@ -1,14 +1,15 @@
 {% load i18n %}
+{% load machina_search_tags %}
 
 {% if is_paginated %}
 <ul class="m-0 pagination {{ pagination_size|default:"" }}">
   <li class="page-item {% if not has_previous %}disabled{% endif %}">
-    <a href="{% if has_previous %}?page={{ previous_page_number }}{% endif %}" class="page-link">&laquo;</a>
+    <a href="{% if has_previous %}{% insert_page_in_url previous_page_number %}{% endif %}" class="page-link">&laquo;</a>
   </li>
   {% for number in page_range %}
     {% if forloop.first %}
     <li class="page-item{% if page_num == number %} active{% endif %}">
-      <a href="?page={{ number }}" class="page-link">{{ number }}</a>
+      <a href="{% insert_page_in_url number %}" class="page-link">{{ number }}</a>
     </li>
     {% if page_num > 4 and total_pages > 6 %}
     <li class="page-item disabled"><a href="#" class="page-link">...</a></li>
@@ -17,19 +18,19 @@
     {% if page_num < total_pages|add:"-3" and total_pages > 6 %}
     <li class="page-item disabled"><a href="" class="page-link">...</a></li>
     {% endif %}
-    <li class="page-item{% if page_num == number %} active{% endif %}"><a href="?page={{ number }}" class="page-link">{{ number }}</a></li>
+    <li class="page-item{% if page_num == number %} active{% endif %}"><a href="{% insert_page_in_url number %}" class="page-link">{{ number }}</a></li>
     {% else %}
     {% if page_num < 3 and number <= 5 %}
-    <li class="page-item{% if page_num == number %} active{% endif %}"><a href="?page={{ number }}" class="page-link">{{ number }}</a></li>
+    <li class="page-item{% if page_num == number %} active{% endif %}"><a href="{% insert_page_in_url number %}" class="page-link">{{ number }}</a></li>
     {% elif page_num > total_pages|add:"-2" and number >= total_pages|add:"-4" %}
-    <li class="page-item{% if page_num == number %} active{% endif %}"><a href="?page={{ number }}" class="page-link">{{ number }}</a></li>
+    <li class="page-item{% if page_num == number %} active{% endif %}"><a href="{% insert_page_in_url number %}" class="page-link">{{ number }}</a></li>
     {% elif number >= previous_page_number|add:"-1" and number <= next_page_number|add:"1" %}
-    <li class="page-item{% if page_num == number %} active{% endif %}"><a href="?page={{ number }}" class="page-link">{{ number }}</a></li>
+    <li class="page-item{% if page_num == number %} active{% endif %}"><a href="{% insert_page_in_url number %}" class="page-link">{{ number }}</a></li>
     {% endif %}
     {% endif %}
   {% endfor %}
   <li class="page-item {% if not has_next %}disabled{% endif %}">
-    <a href="{% if has_next %}?page={{ next_page_number }}{% endif %}" class="page-link">&raquo;</a>
+    <a href="{% if has_next %}{% insert_page_in_url next_page_number %}{% endif %}" class="page-link">&raquo;</a>
   </li>
 </ul>
 {% endif %}
