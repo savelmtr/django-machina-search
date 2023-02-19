@@ -162,6 +162,6 @@ class SearchManager(models.Manager):
         '''
 
     def _get_vector_field(self, search_topics: Optional[bool]) -> str:
-        return 'search_vector_subject' \
+        return 'idx.search_vector_subject' \
             if search_topics else \
-            'search_vector_all'
+            'idx.search_vector_all'
