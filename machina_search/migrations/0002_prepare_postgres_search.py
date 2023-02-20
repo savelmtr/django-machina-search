@@ -40,24 +40,6 @@ class Migration(migrations.Migration):
                     CREATE TRIGGER post_search_index_add 
                     AFTER INSERT OR UPDATE OR DELETE ON forum_conversation_post
                     FOR EACH ROW EXECUTE PROCEDURE update_search_table();
-
-                    UPDATE machina_search_postssearchindex
-                    SET search_vector_all = NULL, search_vector_subject = NULL;
-
-                    -- FILL THE INDEX
-
-                    INSERT into machina_search_postssearchindex 
-                        (topic, search_vector_all, search_vector_subject)
-                    SELECT
-                        p.id,
-                        setweight(to_tsvector('pg_catalog.{0}', coalesce(p.subject, '')), 'A') ||
-                        setweight(to_tsvector('pg_catalog.{0}', coalesce(p.content, '')), 'B'),
-                        to_tsvector('pg_catalog.{0}', coalesce(p.subject, ''))
-                    FROM forum_conversation_post p
-                    ON CONFLICT ("topic") 
-                    DO UPDATE SET
-                        "search_vector_all" = EXCLUDED.search_vector_all,
-                        "search_vector_subject" = EXCLUDED.search_vector_subject;
                     '''.format(settings.SEARCH_LANGUAGE),
 
                     reverse_sql='''
